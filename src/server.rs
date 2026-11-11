@@ -86,7 +86,7 @@ async fn favicon_route(State(s): State<AppState>) -> Response {
     (
         [
             (header::CONTENT_TYPE, s.favicon_type),
-            (header::CACHE_CONTROL, "no-cache"),
+            (header::CACHE_CONTROL, "no-store"),
         ],
         s.favicon,
     )
@@ -110,7 +110,7 @@ async fn manifest(State(s): State<AppState>) -> Response {
     (
         [
             (header::CONTENT_TYPE, "application/manifest+json"),
-            (header::CACHE_CONTROL, "no-cache"),
+            (header::CACHE_CONTROL, "no-store"),
         ],
         body,
     )
@@ -121,7 +121,7 @@ async fn index(State(s): State<AppState>) -> Response {
     (
         [
             (header::CONTENT_TYPE, "text/html; charset=utf-8"),
-            (header::CACHE_CONTROL, "no-cache"),
+            (header::CACHE_CONTROL, "no-store"),
         ],
         s.index,
     )
@@ -134,7 +134,7 @@ macro_rules! asset {
             (
                 [
                     (header::CONTENT_TYPE, $ctype),
-                    (header::CACHE_CONTROL, "no-cache"),
+                    (header::CACHE_CONTROL, "no-store"),
                 ],
                 include_bytes!(concat!("../web/", $name)).as_slice(),
             )
@@ -149,7 +149,7 @@ macro_rules! bundled {
             (
                 [
                     (header::CONTENT_TYPE, "text/javascript"),
-                    (header::CACHE_CONTROL, "no-cache"),
+                    (header::CACHE_CONTROL, "no-store"),
                 ],
                 include_bytes!(concat!(env!("OUT_DIR"), "/web/", $name)).as_slice(),
             )
