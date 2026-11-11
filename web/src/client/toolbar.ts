@@ -13,10 +13,12 @@ export function setupToolbar(app: App, onFullscreenChange: () => void) {
 		clearTimeout(hideTimer);
 		if (ms) hideTimer = setTimeout(() => tools.classList.remove('show'), ms);
 	}
-	// Touch devices keep the toolbar visible; mice reveal it near the top edge.
+	// Touch devices keep the toolbar in the corner, small, and a tap makes it big for
+	// a few seconds; mice reveal it near the top edge.
 	if (matchMedia('(pointer: coarse)').matches) {
 		tools.classList.add('touch');
-		show(0);
+		for (const b of tools.querySelectorAll('button'))
+			b.addEventListener('pointerdown', () => show(5000));
 	} else
 		document.addEventListener('pointermove', (e) => {
 			if (

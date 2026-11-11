@@ -11,6 +11,8 @@ export const Bin = {
 	Audio: 0x02,
 	/** Server: cursor image (RGBA). */
 	Cursor: 0x03,
+	/** Server: cursor position on the streamed display, x and y as i32 LE. */
+	CursorPos: 0x05,
 	/** Server: clipboard image (PNG). */
 	ClipImage: 0x04,
 	/** Client: clipboard image (PNG). */
@@ -123,6 +125,7 @@ export type FromWorker =
 	| { t: 'frames'; parts: StripeFrame[] }
 	| { t: 'status'; s: 'open' | 'closed' }
 	| { t: 'cursor'; buf: ArrayBuffer }
+	| { t: 'cursorPos'; x: number; y: number }
 	| { t: 'clipImage'; buf: ArrayBuffer }
 	| { t: 'log'; s: string }
 	| Stats

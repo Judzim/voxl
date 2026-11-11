@@ -159,6 +159,15 @@
 			#tools.touch {
 				top: auto;
 				bottom: 12px;
+				/* Small and dimmed in the corner; a tap makes it big for a few seconds. */
+				opacity: 0.45;
+				pointer-events: auto;
+				transition:
+					opacity 0.2s,
+					transform 0.2s;
+			}
+			#tools.touch.show {
+				opacity: 1;
 			}
 			.ib {
 				width: 28px;
@@ -190,10 +199,18 @@
 				height: 24px;
 			}
 			#tools.touch .ib {
+				width: 28px;
+				height: 28px;
+			}
+			#tools.touch .ib svg.i {
+				width: 16px;
+				height: 16px;
+			}
+			#tools.touch.show .ib {
 				width: 40px;
 				height: 40px;
 			}
-			#tools.touch .ib svg.i {
+			#tools.touch.show .ib svg.i {
 				width: 20px;
 				height: 20px;
 			}

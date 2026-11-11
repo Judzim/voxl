@@ -479,11 +479,13 @@ fn cursor_image(c: HICON) -> Option<(usize, usize, u32, u32, Vec<u8>)> {
 fn cursor_loop(hub: Arc<Hub>) {
     super::follow_input_desktop();
     let mut last: Option<(isize, bool)> = None;
+    let mut last_pos: Option<(i32, i32)> = None;
     let mut serial = 0u32;
     loop {
         std::thread::sleep(Duration::from_millis(16));
         if hub.clients.lock().is_empty() {
             last = None;
+            last_pos = None;
             continue;
         }
         let mut ci = CURSORINFO {
@@ -494,6 +496,20 @@ fn cursor_loop(hub: Arc<Hub>) {
             continue;
         }
         let shown = ci.flags.0 & CURSOR_SHOWING.0 != 0 && !ci.hCursor.is_invalid();
+        // Where the pointer is on the streamed display: a touch viewer has no hover, so
+        // it draws the cursor from this between taps (type byte 0x05, then x, y as i32).
+        if let Some(g) = *super::GEOMETRY.lock() {
+            let p = (ci.ptScreenPos.x - g.left, ci.ptScreenPos.y - g.top);
+            if shown && last_pos != Some(p) {
+                last_pos = Some(p);
+                let mut msg = Vec::with_capacity(9);
+                msg.push(0x05);
+                msg.extend_from_slice(&p.0.to_le_bytes());
+                msg.extend_from_slice(&p.1.to_le_bytes());
+                let b = Bytes::from(msg);
+                hub.broadcast(|| Out::Bin(b.clone()));
+            }
+        }
         let key = (ci.hCursor.0 as isize, shown);
         if last == Some(key) {
             continue;

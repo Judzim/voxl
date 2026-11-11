@@ -160,6 +160,9 @@ function main() {
 			case 'cursor':
 				cursor.set(m.buf);
 				break;
+			case 'cursorPos':
+				cursor.setPos(m.x, m.y);
+				break;
 			case 'clip':
 				clipboard.onRemoteText(m.d);
 				break;

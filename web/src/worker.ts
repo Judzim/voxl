@@ -107,6 +107,11 @@ function connect() {
 			case Bin.Cursor:
 				post({ t: 'cursor', buf: e.data }, [e.data]);
 				break;
+			case Bin.CursorPos: {
+				const v = new DataView(e.data);
+				post({ t: 'cursorPos', x: v.getInt32(1, true), y: v.getInt32(5, true) });
+				break;
+			}
 			case Bin.ClipImage:
 				post({ t: 'clipImage', buf: e.data }, [e.data]);
 				break;
