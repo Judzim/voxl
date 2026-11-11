@@ -159,15 +159,47 @@
 			#tools.touch {
 				top: auto;
 				bottom: 12px;
-				/* Small and dimmed in the corner; a tap makes it big for a few seconds. */
-				opacity: 0.45;
-				pointer-events: auto;
+				transform-origin: bottom right;
+				transform: scale(0.82);
 				transition:
-					opacity 0.2s,
-					transform 0.2s;
+					opacity 0.15s,
+					transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 			}
 			#tools.touch.show {
+				transform: scale(1);
+			}
+			/* On touch the collapsed toolbar is a single dot; tapping it expands the bar. */
+			#tools-dot {
+				position: fixed;
+				right: 10px;
+				bottom: 12px;
+				width: 26px;
+				height: 26px;
+				padding: 0;
+				border-radius: 50%;
+				border: 1.5px solid var(--border-default);
+				background: color-mix(in srgb, var(--surface-raised) 85%, transparent);
+				backdrop-filter: blur(30px);
+				-webkit-backdrop-filter: blur(30px);
+				box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.45);
+				display: none;
+				z-index: 3;
+				opacity: 0.55;
+				transition:
+					opacity 0.15s,
+					transform 0.15s;
+				cursor: pointer;
+			}
+			#tools-dot:hover {
+				opacity: 0.8;
+			}
+			#tools-dot:active {
 				opacity: 1;
+				transform: scale(0.88);
+			}
+			#tools-dot.hidden {
+				opacity: 0;
+				pointer-events: none;
 			}
 			.ib {
 				width: 28px;
@@ -199,18 +231,10 @@
 				height: 24px;
 			}
 			#tools.touch .ib {
-				width: 28px;
-				height: 28px;
-			}
-			#tools.touch .ib svg.i {
-				width: 16px;
-				height: 16px;
-			}
-			#tools.touch.show .ib {
 				width: 40px;
 				height: 40px;
 			}
-			#tools.touch.show .ib svg.i {
+			#tools.touch .ib svg.i {
 				width: 20px;
 				height: 20px;
 			}
@@ -697,6 +721,7 @@
 				</svg>
 			</button>
 		</div>
+		<button id="tools-dot" type="button" title="Toolbar" aria-label="Show toolbar"></button>
 		<div id="files" role="dialog" aria-label="Files">
 			<header>
 				<h2>Files</h2>

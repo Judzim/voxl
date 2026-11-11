@@ -8,15 +8,23 @@ export function setupToolbar(app: App, onFullscreenChange: () => void) {
 	const kbBtn = el<HTMLButtonElement>('kb-btn');
 	const fsBtn = el<HTMLButtonElement>('fs-btn');
 	let hideTimer: ReturnType<typeof setTimeout> | undefined;
+	const dot = el<HTMLButtonElement>('tools-dot');
 	function show(ms: number) {
 		tools.classList.add('show');
+		dot.classList.add('hidden');
 		clearTimeout(hideTimer);
-		if (ms) hideTimer = setTimeout(() => tools.classList.remove('show'), ms);
+		if (ms) hideTimer = setTimeout(hide, ms);
 	}
-	// Touch devices keep the toolbar in the corner, small, and a tap makes it big for
-	// a few seconds; mice reveal it near the top edge.
+	function hide() {
+		tools.classList.remove('show');
+		dot.classList.remove('hidden');
+	}
+	// Touch devices keep one small dot in the corner; tapping it unfolds the toolbar
+	// for a few seconds. Mice reveal it near the top edge.
 	if (matchMedia('(pointer: coarse)').matches) {
 		tools.classList.add('touch');
+		dot.style.display = 'block';
+		dot.addEventListener('click', () => show(5000));
 		for (const b of tools.querySelectorAll('button'))
 			b.addEventListener('pointerdown', () => show(5000));
 	} else
