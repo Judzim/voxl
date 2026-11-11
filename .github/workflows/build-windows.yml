@@ -1,0 +1,91 @@
+name: Build Windows voxl
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  VCPKG_ROOT: C:\vcpkg
+  VCPKGRS_TRIPLET: x64-windows-static-md
+  ESBUILD: esbuild.cmd
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Setup Node.js for esbuild
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: 22
+
+      - name: Install esbuild
+        shell: pwsh
+        run: |
+          npm install -g esbuild
+          esbuild --version | Out-Host
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "$env:VCPKG_ROOT\vcpkg.exe")) {
+            if (-not (Test-Path "$env:VCPKG_ROOT")) {
+              git clone --depth 1 https://github.com/microsoft/vcpkg.git "$env:VCPKG_ROOT"
+            }
+            & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics
+          }
+          & "$env:VCPKG_ROOT\vcpkg.exe" version
+
+      - name: Cache vcpkg downloads and installed tree
+        uses: actions/cache@v4.2.0
+        with:
+          path: |
+            C:\vcpkg\installed
+            C:\vcpkg\downloads
+          key: vcpkg-win-x64-static-md-v1
+
+      - name: Install vcpkg packages
+        shell: pwsh
+        run: |
+          cd C:\vcpkg
+          git fetch --unshallow
+          .\vcpkg.exe install x264 libyuv opus --triplet x64-windows-static-md --classic
+
+      - name: Set up Built-in LIBCLANG_PATH
+        shell: pwsh
+        run: |
+          $bin = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\Llvm\x64\bin"
+          if (-not (Test-Path (Join-Path $bin "libclang.dll"))) { throw "libclang.dll not found in $bin" }
+          "LIBCLANG_PATH=$bin" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
+          & (Join-Path $bin "clang.exe") --version
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build voxl release
+        shell: pwsh
+        env:
+          VCPKG_ROOT: C:\vcpkg
+          VCPKGRS_TRIPLET: x64-windows-static-md
+          VCPKGRS_DYNAMIC: "0"
+        run: |
+          cargo build --release
+
+      - name: Upload voxl.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: voxl-windows-x64
+          path: target/release/voxl.exe
+          if-no-files-found: error
