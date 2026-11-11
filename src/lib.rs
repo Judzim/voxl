@@ -337,6 +337,9 @@ async fn serve(a: HashMap<String, String>) {
             log::error!("{e}");
             std::process::exit(1);
         });
+    let title = a
+        .get("title")
+        .map_or("Voxl Computer Stream", |t| t.as_str());
     let state = server::AppState {
         hub: hub.clone(),
         audio: audio_on,
@@ -350,11 +353,9 @@ async fn serve(a: HashMap<String, String>) {
             hub.clone(),
             std::time::Duration::from_secs_f64(range_max(a.get("max-record-seconds"), 300.0)),
         ),
-        // --title: the browser tab's title.
-        index: server::index_html(
-            a.get("title")
-                .map_or("Voxl Computer Stream", |t| t.as_str()),
-        ),
+        // --title: the browser tab's title, and the web app manifest's name.
+        title: title.to_string(),
+        index: server::index_html(title),
         favicon,
         favicon_type,
     };

@@ -29,6 +29,8 @@ pub struct AppState {
     pub recorder: Arc<crate::record::Recorder>,
     /// The web client's page, with its title filled in (`index_html`).
     pub index: Bytes,
+    /// --title, for the web app manifest.
+    pub title: String,
     /// The page's icon and its content type (--favicon).
     pub favicon: Bytes,
     pub favicon_type: &'static str,
@@ -87,6 +89,30 @@ async fn favicon_route(State(s): State<AppState>) -> Response {
             (header::CACHE_CONTROL, "no-cache"),
         ],
         s.favicon,
+    )
+        .into_response()
+}
+
+/// The web app manifest: a phone's "Add to home screen" gets a standalone, landscape app.
+async fn manifest(State(s): State<AppState>) -> Response {
+    let name = &s.title;
+    let body = serde_json::json!({
+        "name": name,
+        "short_name": name,
+        "start_url": "/",
+        "display": "standalone",
+        "orientation": "landscape",
+        "background_color": "#000000",
+        "theme_color": "#000000",
+        "icons": [{"src": "favicon.ico", "sizes": "any", "type": "image/x-icon"}],
+    })
+    .to_string();
+    (
+        [
+            (header::CONTENT_TYPE, "application/manifest+json"),
+            (header::CACHE_CONTROL, "no-cache"),
+        ],
+        body,
     )
         .into_response()
 }
@@ -156,6 +182,7 @@ pub fn router(state: AppState) -> Router {
         .route("/audio.js", bundled!("audio.js"))
         .route("/mic.js", bundled!("mic.js"))
         .route("/favicon.ico", get(favicon_route))
+        .route("/manifest.webmanifest", get(manifest))
         .route("/inter.woff2", asset!("inter.woff2", "font/woff2"))
         .route("/healthz", get(|| async { "ok" }))
         .route("/stats", get(stats))
