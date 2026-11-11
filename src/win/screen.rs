@@ -18,7 +18,7 @@ pub const MIN: (u32, u32) = (640, 480);
 
 /// Most pixels a mode may have to be offered (x264's cost grows with area), unless it
 /// is the current one.
-const MAX_PIXELS: u64 = 2560 * 1600;
+const MAX_PIXELS: u64 = 3840 * 2160;
 
 /// Sizes of the selectable modes, for `fit`.
 static SIZES: Mutex<Vec<(u32, u32)>> = Mutex::new(Vec::new());
