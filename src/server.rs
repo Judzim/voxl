@@ -492,6 +492,7 @@ mod tests {
             resize: true,
             read_only,
             recorder: crate::record::Recorder::new(hub.clone(), Duration::from_secs(1)),
+            title: "voxl test".into(),
             index: Bytes::new(),
             favicon: Bytes::new(),
             favicon_type: "image/x-icon",
